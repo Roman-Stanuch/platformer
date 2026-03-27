@@ -1,3 +1,4 @@
 <Solution>
   <Project Path="Platformer/Platformer.csproj" />
+  <Project Path="PolyLib/PolyLib.csproj" Id="f99940c6-f9c4-4594-8210-4e7eeb788ace" />
 </Solution>
