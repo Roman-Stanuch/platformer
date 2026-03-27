@@ -1,8 +1,11 @@
 ﻿using System;
+using System.IO;
+using AsepriteDotNet.Aseprite;
+using AsepriteDotNet.IO;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using MonoGame.Extended.Graphics;
+using MonoGame.Aseprite;
 
 namespace Platformer
 {
@@ -11,7 +14,9 @@ namespace Platformer
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
 
-        private AnimatedSprite _adventurer;
+        private SpriteSheet _characterSpriteSheet;
+        private AnimatedSprite _walk;
+        private AnimatedSprite _jump;
 
         public Game1()
         {
@@ -31,42 +36,20 @@ namespace Platformer
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            Texture2DAtlas atlas = Content.Load<Texture2DAtlas>("sprites/spritesheet");
-            SpriteSheet spriteSheet = new SpriteSheet("Spritesheet/adventurer", atlas);
-
-            TimeSpan duration = TimeSpan.FromSeconds(0.1);
-            spriteSheet.DefineAnimation("attack", builder =>
+            AsepriteFile aseFile;
+            using (Stream stream = TitleContainer.OpenStream("Content/sprites/girl.aseprite"))
             {
-                builder.IsLooping(false)
-                       .AddFrame("adventurer-attack3-00", duration)
-                       .AddFrame("adventurer-attack3-01", duration)
-                       .AddFrame("adventurer-attack3-02", duration)
-                       .AddFrame("adventurer-attack3-03", duration)
-                       .AddFrame("adventurer-attack3-04", duration)
-                       .AddFrame("adventurer-attack3-05", duration);
-            });
+                aseFile = AsepriteFileLoader.FromStream("girl", stream);
+            }
 
-            spriteSheet.DefineAnimation("idle", builder =>
-            {
-                builder.IsLooping(true)
-                       .AddFrame("adventurer-idle-2-00", duration)
-                       .AddFrame("adventurer-idle-2-01", duration)
-                       .AddFrame("adventurer-idle-2-02", duration)
-                       .AddFrame("adventurer-idle-2-03", duration);
-            });
+            _characterSpriteSheet = aseFile.CreateSpriteSheet(GraphicsDevice, onlyVisibleLayers: true);
+            _walk = _characterSpriteSheet.CreateAnimatedSprite("walk");
+            _walk.Scale = new Vector2(10.0f);
+            _jump = _characterSpriteSheet.CreateAnimatedSprite("jump");
+            _jump.Scale = new Vector2(10.0f);
 
-            spriteSheet.DefineAnimation("run", builder =>
-            {
-                builder.IsLooping(true)
-                       .AddFrame("adventurer-run-00", duration)
-                       .AddFrame("adventurer-run-01", duration)
-                       .AddFrame("adventurer-run-02", duration)
-                       .AddFrame("adventurer-run-03", duration)
-                       .AddFrame("adventurer-run-04", duration)
-                       .AddFrame("adventurer-run-05", duration);
-            });
-
-            _adventurer = new AnimatedSprite(spriteSheet, "idle");
+            _walk.Play();
+            _jump.Play();
         }
 
         protected override void Update(GameTime gameTime)
@@ -75,18 +58,21 @@ namespace Platformer
                 Exit();
 
             // TODO: Add your update logic here
-            _adventurer.Update(gameTime);
+            _walk.Update(gameTime);
+            _jump.Update(gameTime);
 
             base.Update(gameTime);
         }
 
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
+            GraphicsDevice.Clear(Color.DarkViolet);
 
             _spriteBatch.Begin(samplerState: SamplerState.PointClamp);
-            int scale = 3;
-            _spriteBatch.Draw(_adventurer, _adventurer.Origin * scale, 0, new Vector2(scale));
+
+            _spriteBatch.Draw(_walk, new Vector2(10, 10));
+            _spriteBatch.Draw(_jump, new Vector2(100, 10));
+
             _spriteBatch.End();
 
             base.Draw(gameTime);
