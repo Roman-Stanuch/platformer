@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using MonoGame.Aseprite;
+using MonoGame.Extended.Input;
 using PolyLib.Graphics;
 using PolyLib;
 
@@ -17,8 +18,8 @@ namespace Platformer
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
 
-        private SpriteSheet _characterSpriteSheet;
         private DirectionalSprite _characterSprite;
+        private Player _player;
 
         public PlatformerGame()
         {
@@ -40,6 +41,7 @@ namespace Platformer
 
             _characterSprite = new DirectionalSprite(GraphicsDevice, "Content/sprites/girl.aseprite", "jump", "land", "walk", "idle");
             _characterSprite.Scale = 10f;
+            _player = new Player(new Vector2(10f, 10f), _characterSprite);
         }
 
         protected override void Update(GameTime gameTime)
@@ -47,40 +49,7 @@ namespace Platformer
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            KeyboardState keyboardState = Keyboard.GetState();
-
-            bool moved = false;
-
-            if (keyboardState.IsKeyDown(Keys.W) || keyboardState.IsKeyDown(Keys.Up))
-            {
-                _characterSprite.Direction = Direction.Up;
-                moved = true;
-            }
-
-            if (keyboardState.IsKeyDown(Keys.S) || keyboardState.IsKeyDown(Keys.Down))
-            {
-                _characterSprite.Direction = Direction.Down;
-                moved = true;
-            }
-
-            if (keyboardState.IsKeyDown(Keys.A) || keyboardState.IsKeyDown(Keys.Left))
-            {
-                _characterSprite.Direction = Direction.Left;
-                moved = true;
-            }
-
-            if (keyboardState.IsKeyDown(Keys.D) || keyboardState.IsKeyDown(Keys.Right))
-            {
-                _characterSprite.Direction = Direction.Right;
-                moved = true;
-            }
-
-            if (!moved)
-            {
-                _characterSprite.Direction = Direction.None;
-            }
-
-            _characterSprite.Update(gameTime);
+            _player.Update(gameTime);
 
             base.Update(gameTime);
         }
@@ -91,7 +60,7 @@ namespace Platformer
 
             _spriteBatch.Begin(samplerState: SamplerState.PointClamp);
 
-            _characterSprite.Draw(_spriteBatch, new Vector2(20f, 20f));
+            _player.Draw(_spriteBatch);
 
             _spriteBatch.End();
 

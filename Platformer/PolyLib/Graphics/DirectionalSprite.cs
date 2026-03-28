@@ -15,6 +15,8 @@ namespace PolyLib.Graphics
         private bool _facingLeft = false;
         private float _scale = 1.0f;
 
+        public Vector2 Position = Vector2.Zero;
+
         public Direction Direction
         {
             get => _direction;
@@ -80,9 +82,9 @@ namespace PolyLib.Graphics
             _currentAnimation.Update(gameTime);
         }
 
-        public void Draw(SpriteBatch spriteBatch, Vector2 location)
+        public void Draw(SpriteBatch spriteBatch)
         {
-            spriteBatch.Draw(_currentAnimation, location);
+            spriteBatch.Draw(_currentAnimation, Position);
         }
     }
 }
