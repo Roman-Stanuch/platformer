@@ -39,7 +39,7 @@ namespace Platformer
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            _characterSprite = new DirectionalSprite(GraphicsDevice, "Content/sprites/girl.aseprite", "jump", "land", "walk", "idle");
+            _characterSprite = new DirectionalSprite(GraphicsDevice, "Content/sprites/girl.aseprite", "jump", "walk", "walk", "idle");
             _characterSprite.Scale = 10f;
             _player = new Player(new Vector2(10f, 10f), _characterSprite);
         }
