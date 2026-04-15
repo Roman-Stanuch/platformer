@@ -2,21 +2,25 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using MonoGame.Extended;
+using MonoGame.Extended.Collisions;
 using MonoGame.Extended.Input;
 using PolyLib;
 using PolyLib.Graphics;
 
 namespace Platformer
 {
-    public class Player
+    public class Player : ICollisionActor
     {
         private DirectionalSprite _sprite;
         private float _speed = 200.0f;
         private float _jumpForce = 1200;
         private float _gravity = 400f;
         private float _timeFalling = 0f;
+        private bool _isColliding = false;
         private Vector2 _velocity = Vector2.Zero;
         private RectangleF _bounds;
+
+        IShapeF ICollisionActor.Bounds => _bounds;
 
         public Player(Vector2 position, DirectionalSprite sprite)
         {
@@ -49,7 +53,7 @@ namespace Platformer
             }
 
             // Gravity
-            if (!IsOnGround())
+            if (!IsOnGround() && !_isColliding)
             {
                 _timeFalling += gameTime.GetElapsedSeconds();
                 _velocity.Y += _gravity * _timeFalling;
@@ -93,6 +97,8 @@ namespace Platformer
             _bounds.Position = newPos;
 
             _sprite.Update(gameTime);
+
+            _isColliding = false;
         }
 
         public void Draw(SpriteBatch spriteBatch)
@@ -103,6 +109,22 @@ namespace Platformer
         private bool IsOnGround()
         {
             return _bounds.Bottom >= 480;
+        }
+
+        public void OnCollision(CollisionEventArgs collisionInfo)
+        {
+            _bounds.Position -= collisionInfo.PenetrationVector;
+
+            if (collisionInfo.PenetrationVector.X != 0)
+            {
+                _velocity = new Vector2(0, _velocity.Y);
+            }
+
+            if (collisionInfo.PenetrationVector.Y != 0)
+            {
+                _timeFalling = 0f;
+                _velocity = new Vector2(_velocity.X, 0);
+            }
         }
     }
 }
