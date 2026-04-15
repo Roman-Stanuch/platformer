@@ -16,7 +16,7 @@ namespace Platformer
         private float _jumpForce = 1200;
         private float _gravity = 400f;
         private float _timeFalling = 0f;
-        private bool _isColliding = false;
+        private bool _isOnGround = false;
         private Vector2 _velocity = Vector2.Zero;
         private RectangleF _bounds;
 
@@ -46,14 +46,8 @@ namespace Platformer
                 _velocity.X += 1;
             }
             
-            // Jumping input
-            if (keyboardState.IsKeyDown(Keys.Space) && IsOnGround())
-            {
-                _velocity.Y -= _jumpForce;
-            }
-
             // Gravity
-            if (!IsOnGround() && !_isColliding)
+            if (!_isOnGround)
             {
                 _timeFalling += gameTime.GetElapsedSeconds();
                 _velocity.Y += _gravity * _timeFalling;
@@ -68,6 +62,13 @@ namespace Platformer
                 _sprite.Direction = Direction.None;
             }
 
+            // Jumping input
+            if (keyboardState.IsKeyDown(Keys.Space) && _isOnGround)
+            {
+                _velocity.Y -= _jumpForce;
+                _isOnGround = false;
+            }
+
             Vector2 newPos = _bounds.Position;
             
             // Handle X position change
@@ -76,7 +77,7 @@ namespace Platformer
                 _sprite.Direction = _velocity.X > 0 ? Direction.Right : Direction.Left;
                 newPos.X += _velocity.X * gameTime.GetElapsedSeconds() * _speed;
             }
-            
+
             // Handle Y position change
             if (_velocity.Y != 0)
             {
@@ -87,28 +88,21 @@ namespace Platformer
 
                 newPos.Y += _velocity.Y * gameTime.GetElapsedSeconds();
             }
-            
-            if (newPos.Y + _bounds.Height > 480)
+
+            if (newPos.Y > 480)
             {
-                newPos.Y = 480 - _bounds.Height;
-                _velocity.Y = 0;
+                newPos.Y = 480;
+                _isOnGround = true;
             }
 
             _bounds.Position = newPos;
 
             _sprite.Update(gameTime);
-
-            _isColliding = false;
         }
 
         public void Draw(SpriteBatch spriteBatch)
         {
             _sprite.Draw(spriteBatch, _bounds.Position);
-        }
-
-        private bool IsOnGround()
-        {
-            return _bounds.Bottom >= 480;
         }
 
         public void OnCollision(CollisionEventArgs collisionInfo)
@@ -122,8 +116,12 @@ namespace Platformer
 
             if (collisionInfo.PenetrationVector.Y != 0)
             {
-                _timeFalling = 0f;
                 _velocity = new Vector2(_velocity.X, 0);
+
+                if (collisionInfo.PenetrationVector.Y > 0)
+                {
+                    _isOnGround = true;
+                }
             }
         }
     }
